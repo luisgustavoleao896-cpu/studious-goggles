@@ -1,0 +1,28 @@
+salvar.php
+<?php
+session_start();
+include 'config.php';
+
+// Validate input
+if (empty($_POST['nome']) || strlen($_POST['nome']) > 255) {
+    $_SESSION['message'] = 'Erro: Nome inválido!';
+    header("Location: index.php");
+    exit;
+}
+
+try {
+    $stmt = $pdo->prepare("INSERT INTO clientes (nome) VALUES (?)");
+    $result = $stmt->execute([trim($_POST['nome'])]);
+    
+    if ($result) {
+        $_SESSION['message'] = 'Cliente salvo com sucesso!';
+    } else {
+        $_SESSION['message'] = 'Erro ao salvar cliente!';
+    }
+} catch(PDOException $e) {
+    $_SESSION['message'] = 'Erro ao salvar: ' . $e->getMessage();
+}
+
+header("Location: index.php");
+exit;
+?>
