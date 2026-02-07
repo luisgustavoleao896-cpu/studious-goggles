@@ -1,0 +1,41 @@
+deletar.php
+<?php
+session_start();
+include 'config.php';
+
+// Validate ID
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    $_SESSION['message'] = 'Erro: ID inválido!';
+    header("Location: index.php");
+    exit;
+}
+
+$id = (int)$_GET['id'];
+
+try {
+    // Check if client exists first
+    $checkStmt = $pdo->prepare("SELECT id FROM clientes WHERE id = ?");
+    $checkStmt->execute([$id]);
+    
+    if ($checkStmt->rowCount() === 0) {
+        $_SESSION['message'] = 'Erro: Cliente não encontrado!';
+        header("Location: index.php");
+        exit;
+    }
+    
+    // Delete the client
+    $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = ?");
+    $result = $stmt->execute([$id]);
+    
+    if ($result) {
+        $_SESSION['message'] = 'Cliente excluído com sucesso!';
+    } else {
+        $_SESSION['message'] = 'Erro ao excluir cliente!';
+    }
+} catch(PDOException $e) {
+    $_SESSION['message'] = 'Erro ao excluir: ' . $e->getMessage();
+}
+
+header("Location: index.php");
+exit;
+?>
